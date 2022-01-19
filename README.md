@@ -2,15 +2,15 @@
 
 2. Run the initial playbook
 
-  `ansible-playbook -i hosts ~/kube-cluster/initial.yml`
+  `ansible-playbook -i hosts initial.yml`
 
 3. Install kubernetes
 
-  `ansible-playbook -i hosts ~/kube-cluster/kube-dependencies.yml`
+  `ansible-playbook -i hosts kube-dependencies.yml`
 
 4. Configuration
 
-  `ansible-playbook -i hosts ~/kube-cluster/control-plane.yml`
+  `ansible-playbook -i hosts control-plane.yml`
 
 
 5. SSH into the node 
