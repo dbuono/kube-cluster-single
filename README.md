@@ -1,20 +1,25 @@
-Run the initial playbook
+1. Configure hosts file
 
-`ansible-playbook -i hosts ~/kube-cluster/initial.yml`
+2. Run the initial playbook
 
-Install kubernetes
+  `ansible-playbook -i hosts ~/kube-cluster/initial.yml`
 
-`ansible-playbook -i hosts ~/kube-cluster/kube-dependencies.yml`
+3. Install kubernetes
 
-Configuration
-`ansible-playbook -i hosts ~/kube-cluster/control-plane.yml`
+  `ansible-playbook -i hosts ~/kube-cluster/kube-dependencies.yml`
+
+4. Configuration
+
+  `ansible-playbook -i hosts ~/kube-cluster/control-plane.yml`
 
 
-SSH into the node 
-(`ssh test@<ip>`)
-Remove control node taint
+5. SSH into the node 
 
-`kubectl taint nodes --all node-role.kubernetes.io/master-`
+  (`ssh test@<ip>`)
+
+6. Remove control node taint
+
+  `kubectl taint nodes --all node-role.kubernetes.io/master-`
   
 Miscellaneous:
 - Easy way to list node information: `virsh net-dhcp-leases --network default`
