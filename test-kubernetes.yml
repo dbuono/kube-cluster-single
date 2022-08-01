@@ -1,0 +1,56 @@
+---
+- hosts: cluster_node
+  tasks:
+
+    - name: Create nginx deployment
+      shell: kubectl create deployment nginx --image=nginx >> nginx_example.txt
+      args:
+        chdir: $HOME
+
+    - name: Create nginx service
+      shell: kubectl expose deploy nginx --port 80 --target-port 80 --type NodePort >> nginx_example.txt
+      args:
+        chdir: $HOME
+
+    - name: List Kubernetes services
+      shell: |
+        echo Waiting 60 seconds: >>  nginx_example.txt
+        sleep 60
+        echo Kubernetes pods: >> nginx_example.txt
+        kubectl get pod --all-namespaces >> nginx_example.txt
+        echo Kubernetes services: >> nginx_example.txt
+        kubectl get services >> nginx_example.txt
+      args:
+        chdir: $HOME
+
+    - name: Remove nginx service
+      shell: kubectl delete service nginx >> nginx_example.txt
+      args:
+        chdir: $HOME
+    
+    - name: Remove nginx deployment
+      shell: kubectl delete deployment nginx >> nginx_example.txt
+      args:
+        chdir: $HOME
+
+    - name: List Deployments
+      shell: |
+        echo Kubernetes Deployments: >> nginx_example.txt
+        kubectl get deployment  >> nginx_example.txt 2>&1
+      args:
+        chdir: $HOME
+
+    - name: Show output logs
+      shell: cat nginx_example.txt
+      args:
+        chdir: $HOME
+      register: command_output
+
+    - name: Delete output logs
+      file:
+        path: $HOME/nginx_example.txt
+        state: absent
+
+    - debug:
+        var: command_output.stdout_lines
+

@@ -1,0 +1,36 @@
+---
+- hosts: cluster_node
+  tasks:
+
+    - name: Apply Deploy yaml
+      shell: kubectl apply -f https://raw.githubusercontent.com/confidential-containers/operator/main/deploy/deploy.yaml
+      args:
+        chdir: $HOME
+
+    - name: Modify and apply ccruntime yaml
+      shell: |
+        wget https://raw.githubusercontent.com/confidential-containers/operator/main/config/samples/ccruntime.yaml
+        sed '/payloadImage/c \ \ \ \ payloadImage: quay.io/alexjcarter/sev-test:latest' ccruntime.yaml  > ccruntime_tmp.yaml
+        sed 's/node-role.kubernetes.io\/worker/node-role.kubernetes.io\/control-plane/' ccruntime_tmp.yaml >> ccruntime_final.yaml
+        kubectl apply -f ccruntime_final.yaml
+      args:
+        chdir: $HOME
+
+    - name: Show changes to ccruntime yaml
+      shell: diff ccruntime.yaml ccruntime_final.yaml
+      register: command_output
+
+    - name: Delete temporary files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - ccruntime.yaml
+        - ccruntime_tmp.yaml
+        - ccruntime_final.yaml
+      args:
+        chdir: $HOME
+
+    - debug:
+            var: command_output.stdout_lines
+      

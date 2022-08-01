@@ -1,0 +1,45 @@
+---
+- hosts: cluster_node
+  tasks:
+    - name: Reset Kubernetes
+      become: yes
+      shell: kubeadm reset --force > cluster_destroyed.txt 2>&1
+      args:
+        chdir: $HOME
+
+    - name: Cleanup CNI configuration
+      become: yes
+      file:
+        path: /etc/cni/net.d
+        state: absent
+
+    - name: Cleanup .kube directory
+      file: 
+        path: $HOME/.kube
+        state: absent
+
+    - name: Cleanup local setup log files
+      file: 
+        path: $HOME/pod_network_setup.txt
+        state: absent
+
+    - name: Cleanup global setup log files
+      become: yes
+      file: 
+        path: /root/cluster_initialized.txt
+        state: absent
+
+    - name: List commands output
+      become: yes
+      shell: cat $HOME/cluster_destroyed.txt
+      register: command_output
+
+    - name: Delete output log
+      become: yes
+      file:
+        path: $HOME/cluster_destroyed.txt
+        state: absent
+
+    - debug:
+            var: command_output.stdout_lines
+
