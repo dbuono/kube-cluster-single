@@ -27,7 +27,6 @@
       with_items:
         - ccruntime.yaml
         - ccruntime_tmp.yaml
-        - ccruntime_final.yaml
       args:
         chdir: $HOME
 

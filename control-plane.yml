@@ -28,7 +28,9 @@
       shell: chown $(id -u):$(id -g) $HOME/.kube/config
 
     - name: Remove taint
-      shell: kubectl taint nodes --all node-role.kubernetes.io/master-
+      shell: |
+        kubectl taint nodes --all node-role.kubernetes.io/master-
+        kubectl taint nodes --all node-role.kubernetes.io/control-plane-
       args:
         chdir: $HOME
 

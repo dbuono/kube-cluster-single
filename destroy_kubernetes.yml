@@ -3,7 +3,8 @@
   tasks:
     - name: Reset Kubernetes
       become: yes
-      shell: kubeadm reset --force > cluster_destroyed.txt 2>&1
+      shell: |
+        kubeadm reset --force > cluster_destroyed.txt 2>&1
       args:
         chdir: $HOME
 
@@ -12,6 +13,31 @@
       file:
         path: /etc/cni/net.d
         state: absent
+    
+    - name: Remove containerd configuration
+      become: yes
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /etc/containerd/config.toml
+        - /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf
+
+    - name: Create containerd config directory
+      become: yes
+      file:
+        path: /etc/containerd
+        state: directory
+
+    - name: Restore containerd configuration
+      become: yes
+      shell: containerd config default > /etc/containerd/config.toml
+
+    - name: Restart Deamons
+      become: yes
+      shell: |
+        systemctl daemon-reload >> cluster_destroyed.txt 2>&1
+        systemctl restart containerd >>  cluster_destroyed.txt 2>&1
 
     - name: Cleanup .kube directory
       file: 
@@ -31,7 +57,14 @@
 
     - name: List commands output
       become: yes
-      shell: cat $HOME/cluster_destroyed.txt
+      shell: |
+        cat $HOME/cluster_destroyed.txt
+        echo Running processes with k8s
+        ps aux | grep -i k8s
+        echo DONE
+        echo Running processes with container
+        ps aux | grep -i container
+        echo DONE
       register: command_output
 
     - name: Delete output log
